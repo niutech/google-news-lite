@@ -9,7 +9,8 @@
 	<body style="font-family: sans-serif;">
 		<div id="result">Loading...</div>
 		<script>
-		var url = 'https://news.google.com/' + location.search;
+		var url = 'https://news.google.com/' + (location.search.indexOf('?u=./') === 0 ? location.search.substring(5) : location.search);
+		var isArticle = location.search.indexOf('?u=./articles/') === 0;
 		var loadHTML = function(data) {
 			if (data
 				&& data.query
@@ -22,10 +23,15 @@
 				&& data.query.results.resources
 				&& data.query.results.resources.content
 				&& data.query.results.resources.status == 200) {
-					var content = data.query.results.resources.content.replace(/<head>/i, '<head><base href="' + url + '"><style>html, body, body > div, body > div > c-wiz { overflow: visible !important; }</style>').replace(/(?:bookmark_border|more_vert|share|keyboard_arrow_up|play_arrow|video_youtube|View more|Wyświetl więcej|Weitere ansehen|Afficher plus|Ver más|और भी देखें|Ещё|もっと見る)/ig, '');
-					document.open();
-					document.write(content);
-					document.close();
+					if (isArticle) {
+						location.replace((data.query.results.resources.content.match(/<noscript>.*href="([^"]+)/i) || [])[1]);
+						return;
+					} else {
+						var content = data.query.results.resources.content.replace(/<head>/i, '<head><base href="' + url + '"><style>html, body, body > div, body > div > c-wiz { overflow: visible !important; }</style>').replace(/\b(?:bookmark_border|more_vert|share|keyboard_arrow_up|play_arrow|video_youtube|View more|Wyświetl więcej|Weitere ansehen|Afficher plus|Ver más|और भी देखें|Ещё|もっと見る)\b/ig, '').replace(/href=".\/(articles|stories)\//ig, 'href="' + location.origin + location.pathname + '?u=./$1/');
+						document.open();
+						document.write(content);
+						document.close();
+					}
 			} else if (data
 				&& data.error
 				&& data.error.description) {
