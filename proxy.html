@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="description" content="The lightweight version of Google News using Google Web Light.">
+		<title>Google News Lite</title>
+		<link rel="shortcut icon" href="favicon.ico">
+	</head>
+	<body style="font-family: sans-serif;">
+		<div id="result">Loading...</div>
+		<script>
+		var url = 'https://news.google.com/' + location.search;
+		var loadHTML = function(data) {
+			if (data
+				&& data.query
+				&& data.query.diagnostics
+				&& data.query.diagnostics.redirect) {
+					send(data.query.diagnostics.redirect.content);
+			} else if (data
+				&& data.query
+				&& data.query.results
+				&& data.query.results.resources
+				&& data.query.results.resources.content
+				&& data.query.results.resources.status == 200) {
+					var content = data.query.results.resources.content.replace(/<head>/i, '<head><base href="' + url + '"><style>html, body, body > div, body > div > c-wiz { overflow: visible !important; }</style>').replace(/(?:bookmark_border|more_vert|share|keyboard_arrow_up|play_arrow|video_youtube|View more|Wyświetl więcej|Weitere ansehen|Afficher plus|Ver más|और भी देखें|Ещё|もっと見る)/ig, '');
+					document.open();
+					document.write(content);
+					document.close();
+			} else if (data
+				&& data.error
+				&& data.error.description) {
+					document.getElementById('result').innerText = data.error.description;
+			} else {
+					document.getElementById('result').innerText = 'Error! Cannot load url: ' + url;
+			}
+		}
+		var send = function (url) {
+			var script = document.createElement('script');
+			script.src = 'https://query.yahooapis.com/v1/public/yql?q=use%20%22https%3A%2F%2Fraw.githubusercontent.com%2Fyql%2Fyql-tables%2Fmaster%2Fdata%2Fdata.headers.xml%22%20as%20headers%3B%20select%20*%20from%20headers%20where%20url%3D%22' + encodeURIComponent(url) + '%22&format=json&diagnostics=true&callback=loadHTML&_maxage=3600';
+			document.body.appendChild(script);
+		}
+		send(url);
+		</script>
+	</body>
+</html>
