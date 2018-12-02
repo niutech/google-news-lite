@@ -12,12 +12,12 @@
 		var url = 'https://news.google.com/' + (location.search.indexOf('?u=./') === 0 ? location.search.substring(5) : location.search);
 		var isArticle = location.search.indexOf('?u=./articles/') === 0;
 		var loadHTML = function(data) {
-			if (data
+			/*if (data
 				&& data.query
 				&& data.query.diagnostics
 				&& data.query.diagnostics.redirect) {
 					send(data.query.diagnostics.redirect.content);
-			} else if (data
+			} else */if (data
 				&& data.query
 				&& data.query.results
 				&& data.query.results.resources
@@ -42,7 +42,7 @@
 		}
 		var send = function (url) {
 			var script = document.createElement('script');
-			script.src = 'https://query.yahooapis.com/v1/public/yql?q=use%20%22https%3A%2F%2Fraw.githubusercontent.com%2Fyql%2Fyql-tables%2Fmaster%2Fdata%2Fdata.headers.xml%22%20as%20headers%3B%20select%20*%20from%20headers%20where%20url%3D%22' + encodeURIComponent(url) + '%22&format=json&diagnostics=true&callback=loadHTML&_maxage=3600';
+			script.src = 'https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20headers%20where%20url%3D%22' + encodeURIComponent(url) + '%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&diagnostics=true&callback=loadHTML&_maxage=3600';
 			document.body.appendChild(script);
 		}
 		send(url);
