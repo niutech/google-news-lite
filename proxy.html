@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="description" content="The lightweight version of Google News using Google Web Light.">
 		<title>Google News Lite</title>
 		<link rel="shortcut icon" href="favicon.ico">
@@ -12,40 +13,37 @@
 		var url = 'https://news.google.com/' + (location.search.indexOf('?u=./') === 0 ? location.search.substring(5) : location.search);
 		var isArticle = location.search.indexOf('?u=./articles/') === 0;
 		var loadHTML = function(data) {
-			/*if (data
-				&& data.query
-				&& data.query.diagnostics
-				&& data.query.diagnostics.redirect) {
-					send(data.query.diagnostics.redirect.content);
-			} else */if (data
-				&& data.query
-				&& data.query.results
-				&& data.query.results.resources
-				&& data.query.results.resources.content
-				&& data.query.results.resources.status == 200) {
-					if (isArticle) {
-						location.replace((data.query.results.resources.content.match(/<noscript>.*href="([^"]+)/i) || [])[1]);
-						return;
-					} else {
-						var content = data.query.results.resources.content.replace(/<head>/i, '<head><base href="' + url + '"><style>html, body, body > div, body > div > c-wiz { overflow: visible !important; }</style>').replace(/\b(?:bookmark_border|more_vert|share|keyboard_arrow_up|play_arrow|video_youtube|View more|Wyświetl więcej|Weitere ansehen|Afficher plus|Ver más|और भी देखें|Ещё|もっと見る)\b/ig, '').replace(/href=".\/(articles|stories)\//ig, 'href="' + location.origin + location.pathname + '?u=./$1/');
-						document.open();
-						document.write(content);
-						document.close();
-					}
-			} else if (data
-				&& data.error
-				&& data.error.description) {
-					document.getElementById('result').innerText = data.error.description;
-			} else {
-					document.getElementById('result').innerText = 'Error! Cannot load url: ' + url;
+			if (data) {
+				if (isArticle) {
+					location.replace((data.match(/<noscript>.*href="([^"]+)/i) || [])[1]);
+				} else {
+					var content = data.replace(/<head>/i, '<head><base href="' + url + '"><style>html, body, body > div, body > div > c-wiz { overflow: visible !important; }</style>').replace(/\b(?:bookmark_border|more_vert|share|keyboard_arrow_up|play_arrow|video_youtube|View more|Wyświetl więcej|Weitere ansehen|Afficher plus|Ver más|और भी देखें|Ещё|もっと見る)\b/ig, '').replace(/href=".\/(articles|stories)\//ig, 'href="' + location.origin + location.pathname + '?u=./$1/');
+					document.open();
+					document.write(content);
+					document.close();
+				}
 			}
 		}
-		var send = function (url) {
-			var script = document.createElement('script');
-			script.src = 'https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20data.headers%20where%20url%3D%22' + encodeURIComponent(url) + '%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&diagnostics=true&callback=loadHTML&_maxage=3600';
-			document.body.appendChild(script);
-		}
-		send(url);
+		var fetchProxy = function (url, i) {
+			var proxy = [
+				'https://cors.io/?',
+				'https://jsonp.afeld.me/?url=',
+				'https://cors-anywhere.herokuapp.com/'
+			];
+			return fetch(proxy[i] + url).then(function (res) {
+				if (!res.ok)
+					throw new Error('Cannot load ' + url + ': ' + res.status + ' ' + res.statusText);
+				return res.text();
+			}).catch(function (error) {
+				if (i === proxy.length - 1)
+					throw error;
+				return fetchProxy(url, i + 1);
+			});
+		};
+		fetchProxy(url, 0).then(loadHTML).catch(function (error) {
+			console.error(error);
+			document.getElementById('result').innerHTML = error;
+		});
 		</script>
 	</body>
 </html>
