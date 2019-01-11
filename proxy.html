@@ -9,6 +9,7 @@
 	</head>
 	<body style="font-family: sans-serif;">
 		<div id="result">Loading...</div>
+		<script src="https://cdn.jsdelivr.net/combine/npm/promise-polyfill/dist/polyfill.min.js,npm/unfetch"></script>
 		<script>
 		var url = 'https://news.google.com/' + (location.search.indexOf('?u=./') === 0 ? location.search.substring(5) : location.search);
 		var isArticle = location.search.indexOf('?u=./articles/') === 0;
